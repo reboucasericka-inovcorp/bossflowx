@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 import { router, Link, usePage } from '@inertiajs/vue3'
 import UserDropdown from '@/components/UserDropdown.vue'

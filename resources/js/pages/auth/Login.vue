@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import Checkbox from '@/components/Checkbox.vue';
 import GuestLayout from '@/layouts/GuestLayout.vue';
 import InputError from '@/components/InputError.vue';

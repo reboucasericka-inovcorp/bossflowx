@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue';
 import GuestLayout from '@/layouts/GuestLayout.vue';
 import PrimaryButton from '@/components/PrimaryButton.vue';

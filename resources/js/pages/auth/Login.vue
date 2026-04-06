@@ -1,11 +1,11 @@
 <script setup lang="ts">
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import Checkbox from '@/components/Checkbox.vue';
-import GuestLayout from '@/layouts/GuestLayout.vue';
 import InputError from '@/components/InputError.vue';
 import InputLabel from '@/components/InputLabel.vue';
 import PrimaryButton from '@/components/PrimaryButton.vue';
 import TextInput from '@/components/TextInput.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import GuestLayout from '@/layouts/GuestLayout.vue';
 
 defineProps({
     canResetPassword: {
@@ -39,7 +39,7 @@ const submit = () => {
 
         <form @submit.prevent="submit">
             <div>
-                <InputLabel for="email" value="Email" />
+                <InputLabel for="email" value="Qual o seu Email?" />
 
                 <TextInput
                     id="email"
@@ -55,7 +55,7 @@ const submit = () => {
             </div>
 
             <div class="mt-4">
-                <InputLabel for="password" value="Password" />
+                <InputLabel for="password" value="Qual a sua Password?" />
 
                 <TextInput
                     id="password"
@@ -73,7 +73,7 @@ const submit = () => {
                 <label class="flex items-center">
                     <Checkbox name="remember" v-model:checked="form.remember" />
                     <span class="ms-2 text-sm text-gray-600"
-                        >Remember me</span
+                        >Posso lembrar de você?</span
                     >
                 </label>
             </div>
@@ -84,7 +84,7 @@ const submit = () => {
                     href="/forgot-password"
                     class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
-                    Esqueceu a sua senha?
+                    Eita! Esqueceu a sua senha?
                 </Link>
 
                 <PrimaryButton

@@ -12,10 +12,39 @@ class TaskController extends Controller
 {
     public function index(Request $request): Response
     {
+        return $this->renderTaskApp($request);
+    }
+
+    public function completed(Request $request): Response
+    {
+        $tasks = TaskModel::query()
+            ->where('user_id', $request->user()->id)
+            ->where('status', TaskModel::STATUS_COMPLETED)
+            ->orderByDesc('completed_at')
+            ->orderByDesc('id')
+            ->get();
+
+        return Inertia::render('Tasks/Completed', [
+            'tasks' => $tasks,
+        ]);
+    }
+
+    private function renderTaskApp(Request $request, ?string $forcedStatus = null): Response
+    {
         $query = TaskModel::query()
             ->where('user_id', $request->user()->id);
 
         $status = $request->string('status')->toString();
+        $tab = $request->string('tab')->toString();
+        if ($status === '' && $tab === 'completed') {
+            $status = TaskModel::STATUS_COMPLETED;
+        }
+        if ($status === '' && $forcedStatus === null) {
+            $status = TaskModel::STATUS_PENDING;
+        }
+        if ($forcedStatus !== null) {
+            $status = $forcedStatus;
+        }
         if ($status === 'pending') {
             $query->where('status', TaskModel::STATUS_PENDING);
         } elseif ($status === 'completed') {
@@ -71,7 +100,7 @@ class TaskController extends Controller
             'tasks' => $tasks,
             'meetings' => $meetingsForCalendar,
             'filters' => [
-                'status' => $status === '' ? 'all' : $status,
+                'status' => $status === '' ? TaskModel::STATUS_PENDING : $status,
                 'priority' => $priority === '' ? 'all' : $priority,
                 'due_from' => is_string($dueFrom) ? $dueFrom : '',
                 'due_to' => is_string($dueTo) ? $dueTo : '',

@@ -4,10 +4,11 @@ import { router } from '@inertiajs/vue3'
 
 const props = defineProps({
   tasks: { type: Array, default: () => [] },
+  basePath: { type: String, default: '/app' },
   filters: {
     type: Object,
     default: () => ({
-      status: 'all',
+      status: 'pending',
       priority: 'all',
       due_from: '',
       due_to: '',
@@ -31,7 +32,7 @@ watch(
 
 function navigate(patch) {
   router.get(
-    '/app',
+    props.basePath,
     { ...props.filters, ...patch },
     { preserveState: true, replace: true },
   )

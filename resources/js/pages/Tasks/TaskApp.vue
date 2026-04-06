@@ -16,7 +16,7 @@ const props = defineProps({
   filters: {
     type: Object,
     default: () => ({
-      status: 'all',
+      status: 'pending',
       priority: 'all',
       due_from: '',
       due_to: '',
@@ -30,6 +30,12 @@ const page = usePage()
 
 const user = computed(() => page.props.auth?.user ?? null)
 const isAuth = computed(() => !!page.props.auth?.user)
+const taskBasePath = computed(() => {
+  const u = page.url || ''
+  if (u.startsWith('/tarefas/concluidas')) return '/tarefas/concluidas'
+  if (u.startsWith('/tarefas')) return '/tarefas'
+  return '/app'
+})
 
 const loading = ref(false)
 const editingTask = ref(null)
@@ -44,7 +50,7 @@ watch(
 
 function applySidebarSearch() {
   router.get(
-    '/app',
+    taskBasePath.value,
     { ...props.filters, search: searchSidebar.value },
     { preserveState: true, replace: true },
   )
@@ -89,7 +95,7 @@ const isAppHomeActive = computed(() => {
   const f = props.filters
   return (
     f.view !== 'week'
-    && f.status === 'all'
+    && f.status === 'pending'
     && f.priority === 'all'
     && !(f.due_from || f.due_to || String(f.search || '').trim())
   )
@@ -99,6 +105,12 @@ const isMeetingsHistoryActive = computed(() => {
   const u = page.url || ''
   if (!u.includes('reunioes')) return false
   return u.includes('tab=completed')
+})
+
+const isTasksHistoryActive = computed(() => {
+  const u = page.url || ''
+  return u.startsWith('/tarefas/concluidas')
+    || (props.filters.status === 'completed' && props.filters.view !== 'week')
 })
 </script>
 
@@ -162,8 +174,8 @@ const isMeetingsHistoryActive = computed(() => {
           <ul class="mt-1 space-y-1">
             <li>
               <Link
-                href="/app?status=completed"
-                :class="navClass(filters.status === 'completed' && filters.view !== 'week')"
+                href="/tarefas/concluidas"
+                :class="navClass(isTasksHistoryActive)"
               >
                 Tarefas concluídas
               </Link>
@@ -208,7 +220,7 @@ const isMeetingsHistoryActive = computed(() => {
             />
           </div>
 
-          <TaskListPanel :tasks="tasks" :filters="filters" @edit="onEditTask" />
+          <TaskListPanel :tasks="tasks" :base-path="taskBasePath" :filters="filters" @edit="onEditTask" />
         </div>
       </div>
     </main>

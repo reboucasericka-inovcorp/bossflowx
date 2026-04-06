@@ -22,6 +22,8 @@ Route::get('/', function () {
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/app', [TaskController::class, 'index'])->name('app');
+    Route::get('/tarefas', [TaskController::class, 'index'])->name('tasks.index');
+    Route::get('/tarefas/concluidas', [TaskController::class, 'completed'])->name('tasks.completed');
 
     Route::redirect('/breve/reunioes', '/reunioes');
 

@@ -31,6 +31,30 @@ test('authenticated user sees only own tasks on app', function () {
             ->where('tasks.0.title', 'Mine'));
 });
 
+test('app defaults to pending tasks only when no status filter is provided', function () {
+    $user = User::factory()->create();
+    TaskModel::create([
+        'title' => 'Pendente',
+        'user_id' => $user->id,
+        'priority' => 'medium',
+        'status' => TaskModel::STATUS_PENDING,
+    ]);
+    TaskModel::create([
+        'title' => 'Concluida',
+        'user_id' => $user->id,
+        'priority' => 'medium',
+        'status' => TaskModel::STATUS_COMPLETED,
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('app'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('tasks', 1)
+            ->where('tasks.0.title', 'Pendente')
+            ->where('filters.status', TaskModel::STATUS_PENDING));
+});
+
 test('user can create a task', function () {
     $user = User::factory()->create();
     $this->actingAs($user)
@@ -196,6 +220,79 @@ test('status filter returns only matching tasks', function () {
             ->has('tasks', 1)
             ->where('tasks.0.title', 'Feita')
             ->where('filters.status', 'completed'));
+});
+
+test('tab completed filters completed tasks for historical shortcut', function () {
+    $user = User::factory()->create();
+    TaskModel::create([
+        'user_id' => $user->id,
+        'title' => 'Feita via tab',
+        'priority' => 'medium',
+        'status' => TaskModel::STATUS_COMPLETED,
+    ]);
+    TaskModel::create([
+        'user_id' => $user->id,
+        'title' => 'Nao concluida',
+        'priority' => 'medium',
+        'status' => TaskModel::STATUS_PENDING,
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('app', ['tab' => 'completed']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('tasks', 1)
+            ->where('tasks.0.title', 'Feita via tab')
+            ->where('filters.status', 'completed'));
+});
+
+test('tarefas route supports completed history tab', function () {
+    $user = User::factory()->create();
+    TaskModel::create([
+        'user_id' => $user->id,
+        'title' => 'Concluida em tarefas',
+        'priority' => 'medium',
+        'status' => TaskModel::STATUS_COMPLETED,
+    ]);
+    TaskModel::create([
+        'user_id' => $user->id,
+        'title' => 'Pendente em tarefas',
+        'priority' => 'medium',
+        'status' => TaskModel::STATUS_PENDING,
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('tasks.index', ['tab' => 'completed']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('tasks', 1)
+            ->where('tasks.0.title', 'Concluida em tarefas')
+            ->where('filters.status', 'completed'));
+});
+
+test('tarefas concluidas route returns only completed tasks', function () {
+    $user = User::factory()->create();
+    TaskModel::create([
+        'user_id' => $user->id,
+        'title' => 'Concluida rota dedicada',
+        'priority' => 'medium',
+        'status' => TaskModel::STATUS_COMPLETED,
+    ]);
+    TaskModel::create([
+        'user_id' => $user->id,
+        'title' => 'Pendente rota dedicada',
+        'priority' => 'medium',
+        'status' => TaskModel::STATUS_PENDING,
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('tasks.completed'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Tasks/Completed')
+            ->has('tasks', 1)
+            ->where('tasks.0.title', 'Concluida rota dedicada')
+            ->where('tasks.0.status', TaskModel::STATUS_COMPLETED));
 });
 
 test('search filter matches title and description', function () {
